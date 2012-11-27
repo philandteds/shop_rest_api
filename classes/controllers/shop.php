@@ -91,13 +91,21 @@ class ShopController extends ezpRestMvcController
 				$productInfo = array( '_tag' => 'product' );
 				$discount    = $productItem['price_inc_vat'] * $productItem['discount_percent'] . ' ' . $currency;
 
-				$productInfo['SKU']                 = 'IS_NOT_IMPLEMENTED_YET';
+				$productInfo['SKU']                 = null;
 				$productInfo['name']                = $productItem['object_name'];
 				$productInfo['count']               = $productItem['item_count'];
 				$productInfo['vat_value']           = $productItem['vat_value'] . ' ' . $currency;
 				$productInfo['total_price_ex_vat']  = $productItem['total_price_ex_vat'] . ' ' . $currency;
 				$productInfo['total_price_inc_vat'] = $productItem['total_price_inc_vat'] . ' ' . $currency;
 				$productInfo['discount']            = $discount;
+
+				$options = eZProductCollectionItemOption::fetchList( $productItem['id'] );
+				foreach( $options as $option ) {
+					if( $option->attribute( 'name' ) == 'Variations' ) {
+						$productInfo['SKU'] = $option->attribute( 'value' );
+					}
+				}
+
 				$orderInfo['products'][] = $productInfo;
 			}
 
