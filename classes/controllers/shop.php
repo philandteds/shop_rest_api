@@ -91,7 +91,7 @@ class ShopController extends ezpRestMvcController
 				$productInfo = array( '_tag' => 'product' );
 				$discount    = $productItem['price_inc_vat'] * $productItem['discount_percent'] . ' ' . $currency;
 
-				$productInfo['SKU']                 = null;
+				$productInfo['SKU']                 = false;
 				$productInfo['name']                = $productItem['object_name'];
 				$productInfo['count']               = $productItem['item_count'];
 				$productInfo['vat_value']           = $productItem['vat_value'] . ' ' . $currency;
