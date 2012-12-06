@@ -18,6 +18,14 @@ class ShopProvider implements ezpRestProviderInterface
 					'onlyNew' => true,
 					'output'  => 'xml'
 				)
+			),
+			'processOrders' => new ezpMvcRegexpRoute(
+				'@^/orders/process$@',
+				'ShopController',
+				array(
+					'http-get'  => 'processOrders',
+					'http-post' => 'processOrders'
+				)
 			)
 		);
 	}

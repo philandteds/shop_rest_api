@@ -31,8 +31,20 @@ class ezOrderExportHistory extends eZPersistentObject
 					'default'  => null,
 					'required' => true
 				),
-				'date' => array(
-					'name'     => 'Date',
+				'is_sent_lj' => array(
+					'name'     => 'IsSentLJ',
+					'datatype' => 'integer',
+					'default'  => 0,
+					'required' => true
+				),
+				'is_processed_lj' => array(
+					'name'     => 'IsProcessedLJ',
+					'datatype' => 'integer',
+					'default'  => 0,
+					'required' => true
+				),
+				'sent_to_lj_at' => array(
+					'name'     => 'SentToLjAt',
 					'datatype' => 'integer',
 					'default'  => time(),
 					'required' => true

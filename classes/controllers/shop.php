@@ -117,6 +117,46 @@ class ShopController extends ezpRestMvcController
 		return $result;
 	}
 
+	public function doProcessOrders() {
+		$orderIDs = isset( $this->request->get['order_ids'] ) === false
+			? isset( $this->request->post['order_ids'] )
+				? $this->request->post['order_ids']
+				: null
+			: $this->request->get['order_ids'];
+
+		if( $orderIDs === null ) {
+			throw new Exception( 'order_ids parameter is missing' );
+		}
+
+		$feed = array(
+			'_tag'       => 'response',
+			'collection' => array()
+		);
+
+		$orderIDs = explode( ',', $orderIDs );
+		foreach( $orderIDs as $orderID ) {
+			$orderID     = trim( $orderID );
+			$isProcessed = false;
+
+			$order = ezOrderExportHistory::fetchByOrderID( (int) $orderID );
+			if( $order instanceof ezOrderExportHistory ) {
+				$order->setAttribute( 'is_processed_lj', 1 );
+				$order->store();
+				$isProcessed = true;
+			}
+
+			$feed['collection'][] = array(
+				'_tag'         => 'order',
+				'id'           => $orderID,
+				'is_processed' => (int) $isProcessed
+			);
+		}
+
+		$result = new ezpRestMvcResult();
+		$result->variables['feed'] = $feed;
+		return $result;
+	}
+
 	private function fetchOrders() {
 		/**
 		 * eZPersistentObject does not support NOT IN SQL statement. Thats why all
@@ -132,7 +172,10 @@ class ShopController extends ezpRestMvcController
 		if( (bool) $this->request->variables['onlyNew'] === true ) {
 			foreach( $orders as $key => $order ) {
 				$exportHistory = ezOrderExportHistory::fetchByOrderID( $order->attribute( 'id' ) );
-				if( $exportHistory instanceof ezOrderExportHistory ) {
+				if(
+					$exportHistory instanceof ezOrderExportHistory
+					&& (bool) $exportHistory->attribute( 'is_sent_lj' )
+				) {
 					unset( $orders[ $key ] );
 				}
 			}
@@ -142,7 +185,13 @@ class ShopController extends ezpRestMvcController
 	}
 
 	private function markOrderAsExported( eZOrder $order ) {
-		$exportHistory = new ezOrderExportHistory( array( 'order_id' => $order->attribute( 'id' ) ) );
+		$exportHistory = new ezOrderExportHistory(
+			array(
+				'order_id'      => $order->attribute( 'id' ),
+				'is_sent_lj'    => 1,
+				'sent_to_lj_at' => time()
+			)
+		);
 		$exportHistory->store();
 	}
 }

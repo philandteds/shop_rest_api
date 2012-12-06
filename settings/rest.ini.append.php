@@ -8,4 +8,12 @@ AuthenticationStyle=ezpRestBasicAuthStyle
 
 [CacheSettings]
 ApplicationCache=disabled
+
+[Export]
+WrongOrdersTimeDiff=3600
+
+[Notifications]
+Receivers[]
+Receivers[]=dolgushev.serhey@gmail.com
+
 */ ?>
