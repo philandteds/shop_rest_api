@@ -71,6 +71,7 @@ class ShopController extends ezpRestMvcController
 			$orderInfo['updated']             = date( 'c', $order->attribute( 'status_modified' ) );
 			$orderInfo['account_name']        = $order->attribute( 'account_name' );
 			$orderInfo['account_email']       = $order->attribute( 'account_email' );
+			$orderInfo['user_comment']        = $accountInfo['message'];
 			foreach( self::$priceAttributes as $attribute ) {
 				$orderInfo[ $attribute ] = $order->attribute( $attribute ) . ' ' . $currency;
 			}
