@@ -157,6 +157,62 @@ class ShopController extends ezpRestMvcController
 		return $result;
 	}
 
+	public function doImportProducts() {
+		if( isset( $this->request->post['request'] ) === false ) {
+			throw new Exception( '"request" is not specified' );
+		}
+
+		$DOMDocument = new DOMDocument();
+		if( @$DOMDocument->loadXML( $this->request->post['request'] ) === false ) {
+			throw new Exception( '"request" is not valid XML' );
+		}
+
+		$configs   = array( 'ljImportConfigProductSKU', 'ljImportConfigPrice' );
+		$timestamp = time();
+		$emailLogs = array();
+		foreach( $configs as $configClass ) {
+			$startTime = time();
+
+			$importConfig = new $configClass;
+			$importConfig->setDOMDocument( $DOMDocument );
+			$importConfig->clearLogMessages();
+
+			$importController = new ljImportController( $importConfig );
+			$importController->log( 'Starting import for ' . get_class( $importConfig ), array( 'blue' ) );
+			$importController->run( $timestamp );
+
+			$executionTime = round( microtime( true ) - $startTime, 2 );
+
+			$importController->log( 'Import took ' . $executionTime . ' secs.' );
+			$importController->log( 'Created ' . $importController->counter['create'] . ' items, updated ' . $importController->counter['update'] . ' items, skiped ' . $importController->counter['skip'] . ' items.' );
+			$importController->log( 'Available items in feed: ' . count( $importController->config->dataList ) . '.' );
+
+			if( $importController->counter['create'] + $importController->counter['update'] > 0) {
+				$speed = ( $importController->counter['create'] + $importController->counter['update'] ) / $executionTime;
+				$speed = round( $speed, 2 );
+				$importController->log( 'Average speed: ' . $speed . ' items/sec.' );
+			}
+
+			$emailLogs[ str_replace( 'ljImportConfig', '', $configClass ) ] = $importConfig->getLogMessages();
+
+			unset( $importController );
+		}
+
+		$emailLogs = ljImportController::groupLogMessages( $emailLogs );
+		ljImportController::sendResultsEmail( $emailLogs );
+
+		$feed = array(
+			'_tag'       => 'response',
+			'collection' => array(
+				'status' => 'SUCCESS'
+			)
+		);
+
+		$result = new ezpRestMvcResult();
+		$result->variables['feed'] = $feed;
+		return $result;
+	}
+
 	private function fetchOrders() {
 		/**
 		 * eZPersistentObject does not support NOT IN SQL statement. Thats why all

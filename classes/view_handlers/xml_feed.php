@@ -37,7 +37,11 @@ class XMLFeedViewHandler implements ezcMvcViewHandler
 		$this->DOM->appendChild( $response );
 
 		foreach( $this->variables['feed']['collection'] as $key => $data ) {
-			$this->appendArray( $key, $data, $response );
+			if( is_array( $data ) ) {
+				$this->appendArray( $key, $data, $response );
+			} else {
+				$response->appendChild( $this->DOM->createElement( $key, $data ) );
+			}
 		}
 
     	$this->result = $this->DOM->saveXML();
