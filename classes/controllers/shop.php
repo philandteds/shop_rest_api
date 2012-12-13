@@ -168,6 +168,9 @@ class ShopController extends ezpRestMvcController
 			throw new Exception( '"request" is not valid XML' );
 		}
 
+		$moduleRepositories = eZModule::activeModuleRepositories( false );
+		eZModule::setGlobalPathList( $moduleRepositories );
+
 		$configs   = array( 'ljImportConfigProductSKU', 'ljImportConfigPrice' );
 		$timestamp = time();
 		$emailLogs = array();
