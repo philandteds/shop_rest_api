@@ -76,4 +76,10 @@ class ezOrderExportHistory extends eZPersistentObject
 			$limitations
 		);
 	}
+
+	public function fetchListWrapper( $conditions = null, $limitations = null ) {
+		return array(
+			'result' => self::fetchList( $conditions, $limitations )
+		);
+	}
 }
