@@ -114,7 +114,7 @@ class ShopController extends ezpRestMvcController
 
 				$options = eZProductCollectionItemOption::fetchList( $productItem['id'] );
 				foreach( $options as $option ) {
-					if( $option->attribute( 'name' ) == 'Variations' ) {
+					if( $option->attribute( 'name' ) == 'variations' ) {
 						$productInfo['SKU'] = $option->attribute( 'value' );
 					}
 				}
