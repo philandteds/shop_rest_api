@@ -60,7 +60,7 @@ class XMLFeedViewHandler implements ezcMvcViewHandler
 		$parentNode->appendChild( $node );
 		foreach( $data as $key => $value ) {
 			if( is_scalar( $value ) ) {
-				$node->appendChild( $this->DOM->createElement( $key, $value ) );
+				$node->appendChild( $this->DOM->createElement( $key, htmlspecialchars( $value ) ) );
 			} elseif( is_array( $value ) ) {
 				$this->appendArray( $key, $value, $node );
 			}
