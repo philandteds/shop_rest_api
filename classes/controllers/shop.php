@@ -91,7 +91,11 @@ class ShopController extends ezpRestMvcController
 			$orderInfo['billing_info']	 = array();
 			$orderInfo['shipping_info'] = array();
 			foreach( self::$billingAttributes as $attribute ) {
-				$value = isset( $accountInfo[ $attribute ] ) ? $accountInfo[ $attribute ] : null;
+				if ( isset( $accountInfo[ $attribute ] ) && $attribute == 'state' ) {
+					$value = xrowGeonames::getSubdivisionName($accountInfo[ 'country' ], $accountInfo[ $attribute ] );
+				} else {
+					$value = isset( $accountInfo[ $attribute ] ) ? $accountInfo[ $attribute ] : null;
+				}
 				$orderInfo['billing_info'][ $attribute ] = $value;
 
 				$spinningAttribute = 's_' . $attribute;
