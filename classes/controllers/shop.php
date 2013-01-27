@@ -150,20 +150,31 @@ class ShopController extends ezpRestMvcController
 		);
 
 		$orderIDs = explode( ',', $orderIDs );
-		foreach( $orderIDs as $orderID ) {
-			$orderID     = trim( $orderID );
+		foreach( $orderIDs as $orderNumber ) {
+			$orderNumber = trim( $orderNumber );
 			$isProcessed = false;
 
-			$order = ezOrderExportHistory::fetchByOrderID( (int) $orderID );
-			if( $order instanceof ezOrderExportHistory ) {
-				$order->setAttribute( 'is_processed_lj', 1 );
-				$order->store();
-				$isProcessed = true;
+			$order = eZPersistentObject::fetchObject(
+				eZOrder::definition(),
+				null,
+				array( 'order_nr' => $orderNumber ),
+				false
+			);
+			if(
+				is_array( $order )
+				&& isset( $order['id'] )
+			) {
+				$historyItem = ezOrderExportHistory::fetchByOrderID( (int) $order['id'] );
+				if( $historyItem instanceof ezOrderExportHistory ) {
+					$historyItem->setAttribute( 'is_processed_lj', 1 );
+					$historyItem->store();
+					$isProcessed = true;
+				}
 			}
 
 			$feed['collection'][] = array(
 				'_tag'         => 'order',
-				'id'           => $orderID,
+				'id'           => $orderNumber,
 				'is_processed' => (int) $isProcessed
 			);
 		}
