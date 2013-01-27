@@ -71,8 +71,7 @@ class ShopController extends ezpRestMvcController
 			}
 
 			$orderInfo                        = array( '_tag' => 'order' );
-			$orderInfo['id']                  = $order->attribute( 'id' );
-			$orderInfo['order_nr']            = $order->attribute( 'order_nr' );
+			$orderInfo['id']                  = $order->attribute( 'order_nr' );
 			$orderInfo['is_archived']         = $order->attribute( 'is_archived' );
 			$orderInfo['was_exported_before'] = (int) ( $exportHistory instanceof ezOrderExportHistory );
 			$orderInfo['status']              = $order->attribute( 'status_name' );
