@@ -87,6 +87,16 @@ class ShopController extends ezpRestMvcController
 				$orderInfo[ $attribute ] = $order->attribute( $attribute ) . ' ' . $currency;
 			}
 
+			$shippingCost = 0;
+			$items = $order->attribute( 'order_items' );
+			foreach( $items as $item ) {
+				if( $item->attribute( 'type' ) === 'ezcustomshipping' ) {
+					$shippingCost = $item->attribute( 'price' );
+					break;
+				}
+			}
+			$orderInfo['shipping_cost'] = $shippingCost . ' ' . $currency;
+
 			$orderInfo['billing_info']	 = array();
 			$orderInfo['shipping_info'] = array();
 			foreach( self::$billingAttributes as $attribute ) {
