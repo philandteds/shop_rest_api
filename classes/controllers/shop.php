@@ -204,42 +204,49 @@ class ShopController extends ezpRestMvcController
 			throw new Exception( '"request" is not valid XML' );
 		}
 
-		$moduleRepositories = eZModule::activeModuleRepositories( false );
-		eZModule::setGlobalPathList( $moduleRepositories );
+		if( isset( $this->request->get['cli'] ) ) {
+			if( $DOMDocument->save( 'extension/lj_import/source.xml' ) === false ) {
+				throw new Exception( 'Could not save XML to file' );
+			}
+			exec( '$(which php) extension/lj_import/bin/php/import.php > var/log/cli_import.log &' );
+		} else {
+			$moduleRepositories = eZModule::activeModuleRepositories( false );
+			eZModule::setGlobalPathList( $moduleRepositories );
 
-		$configs   = array( 'ljImportConfigProductSKU', 'ljImportConfigPrice' );
-		$timestamp = time();
-		$emailLogs = array();
-		foreach( $configs as $configClass ) {
-			$startTime = time();
+			$configs   = array( 'ljImportConfigProductSKU', 'ljImportConfigPrice' );
+			$timestamp = time();
+			$emailLogs = array();
+			foreach( $configs as $configClass ) {
+				$startTime = time();
 
-			$importConfig = new $configClass;
-			$importConfig->setDOMDocument( $DOMDocument );
-			$importConfig->clearLogMessages();
+				$importConfig = new $configClass;
+				$importConfig->setDOMDocument( $DOMDocument );
+				$importConfig->clearLogMessages();
 
-			$importController = new ljImportController( $importConfig );
-			$importController->log( 'Starting import for ' . get_class( $importConfig ), array( 'blue' ) );
-			$importController->run( $timestamp );
+				$importController = new ljImportController( $importConfig );
+				$importController->log( 'Starting import for ' . get_class( $importConfig ), array( 'blue' ) );
+				$importController->run( $timestamp );
 
-			$executionTime = round( microtime( true ) - $startTime, 2 );
+				$executionTime = round( microtime( true ) - $startTime, 2 );
 
-			$importController->log( 'Import took ' . $executionTime . ' secs.' );
-			$importController->log( 'Created ' . $importController->counter['create'] . ' items, updated ' . $importController->counter['update'] . ' items, skiped ' . $importController->counter['skip'] . ' items.' );
-			$importController->log( 'Available items in feed: ' . count( $importController->config->dataList ) . '.' );
+				$importController->log( 'Import took ' . $executionTime . ' secs.' );
+				$importController->log( 'Created ' . $importController->counter['create'] . ' items, updated ' . $importController->counter['update'] . ' items, skiped ' . $importController->counter['skip'] . ' items.' );
+				$importController->log( 'Available items in feed: ' . count( $importController->config->dataList ) . '.' );
 
-			if( $importController->counter['create'] + $importController->counter['update'] > 0) {
-				$speed = ( $importController->counter['create'] + $importController->counter['update'] ) / $executionTime;
-				$speed = round( $speed, 2 );
-				$importController->log( 'Average speed: ' . $speed . ' items/sec.' );
+				if( $importController->counter['create'] + $importController->counter['update'] > 0) {
+					$speed = ( $importController->counter['create'] + $importController->counter['update'] ) / $executionTime;
+					$speed = round( $speed, 2 );
+					$importController->log( 'Average speed: ' . $speed . ' items/sec.' );
+				}
+
+				$emailLogs[ str_replace( 'ljImportConfig', '', $configClass ) ] = $importConfig->getLogMessages();
+
+				unset( $importController );
 			}
 
-			$emailLogs[ str_replace( 'ljImportConfig', '', $configClass ) ] = $importConfig->getLogMessages();
-
-			unset( $importController );
+			$emailLogs = ljImportController::groupLogMessages( $emailLogs );
+			ljImportController::sendResultsEmail( $emailLogs );
 		}
-
-		$emailLogs = ljImportController::groupLogMessages( $emailLogs );
-		ljImportController::sendResultsEmail( $emailLogs );
 
 		$feed = array(
 			'_tag'       => 'response',
