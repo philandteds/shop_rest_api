@@ -205,7 +205,8 @@ class ShopController extends ezpRestMvcController
 		}
 
 		if( isset( $this->request->get['cli'] ) ) {
-			if( $DOMDocument->save( 'extension/lj_import/source.xml' ) === false ) {
+			$sourceFile = eZINI::instance( 'ljimport.ini' )->variable( 'General', 'SourceFile' );
+			if( $DOMDocument->save( $sourceFile ) === false ) {
 				throw new Exception( 'Could not save XML to file' );
 			}
 			exec( '$(which php) extension/lj_import/bin/php/import.php > var/log/cli_import.log &' );
