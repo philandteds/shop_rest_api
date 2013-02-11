@@ -160,7 +160,8 @@ class ShopController extends ezpRestMvcController
 		);
 
 		$orderIDs = explode( ',', $orderIDs );
-		foreach( $orderIDs as $orderNumber ) {
+		foreach( $orderIDs as $orderID ) {
+			/*
 			$orderNumber = trim( $orderNumber );
 			$isProcessed = false;
 
@@ -180,6 +181,13 @@ class ShopController extends ezpRestMvcController
 					$historyItem->store();
 					$isProcessed = true;
 				}
+			}
+			*/
+			$historyItem = ezOrderExportHistory::fetchByOrderID( (int) trim( $orderID ) );
+			if( $historyItem instanceof ezOrderExportHistory ) {
+				$historyItem->setAttribute( 'is_processed_lj', 1 );
+				$historyItem->store();
+				$isProcessed = true;
 			}
 
 			$feed['collection'][] = array(
