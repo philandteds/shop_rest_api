@@ -34,7 +34,8 @@ class ShopController extends ezpRestMvcController
 			}
 		}
 
-		$regions = eZINI::instance( 'site.ini' )->variable( 'RegionalSettings', 'TranslationSA' );
+		$regions  = eZINI::instance( 'site.ini' )->variable( 'RegionalSettings', 'TranslationSA' );
+		$shopName = eZINI::instance( 'xrowecommerce.ini' )->variable( 'Settings', 'Shop' );
 
 		$feed = array(
 			'_tag'       => 'orders',
@@ -71,7 +72,7 @@ class ShopController extends ezpRestMvcController
 			}
 
 			$orderInfo                        = array( '_tag' => 'order' );
-			$orderInfo['id']                  = $order->attribute( 'order_nr' );
+			$orderInfo['id']                  = $shopName . '_' . $order->attribute( 'id' );
 			$orderInfo['is_archived']         = $order->attribute( 'is_archived' );
 			$orderInfo['was_exported_before'] = (int) ( $exportHistory instanceof ezOrderExportHistory );
 			$orderInfo['status']              = $order->attribute( 'status_name' );
@@ -165,29 +166,10 @@ class ShopController extends ezpRestMvcController
 
 		$orderIDs = explode( ',', $orderIDs );
 		foreach( $orderIDs as $orderID ) {
-			/*
-			$orderNumber = trim( $orderNumber );
-			$isProcessed = false;
+			$tmp     = explode( '_', $orderID );
+			$orderID = (int) end( $tmp );
 
-			$order = eZPersistentObject::fetchObject(
-				eZOrder::definition(),
-				null,
-				array( 'order_nr' => $orderNumber ),
-				false
-			);
-			if(
-				is_array( $order )
-				&& isset( $order['id'] )
-			) {
-				$historyItem = ezOrderExportHistory::fetchByOrderID( (int) $order['id'] );
-				if( $historyItem instanceof ezOrderExportHistory ) {
-					$historyItem->setAttribute( 'is_processed_lj', 1 );
-					$historyItem->store();
-					$isProcessed = true;
-				}
-			}
-			*/
-			$historyItem = ezOrderExportHistory::fetchByOrderID( (int) trim( $orderID ) );
+			$historyItem = ezOrderExportHistory::fetchByOrderID( $orderID );
 			if( $historyItem instanceof ezOrderExportHistory ) {
 				$historyItem->setAttribute( 'is_processed_lj', 1 );
 				$historyItem->store();
