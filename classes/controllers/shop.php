@@ -72,7 +72,7 @@ class ShopController extends ezpRestMvcController
 			}
 
 			$orderInfo                        = array( '_tag' => 'order' );
-			$orderInfo['id']                  = $shopName . '_' . $order->attribute( 'id' );
+			$orderInfo['id']                  = $shopName . $order->attribute( 'id' );
 			$orderInfo['is_archived']         = $order->attribute( 'is_archived' );
 			$orderInfo['was_exported_before'] = (int) ( $exportHistory instanceof ezOrderExportHistory );
 			$orderInfo['status']              = $order->attribute( 'status_name' );
@@ -164,10 +164,10 @@ class ShopController extends ezpRestMvcController
 			'collection' => array()
 		);
 
+		$shopName = eZINI::instance( 'xrowecommerce.ini' )->variable( 'Settings', 'Shop' );
 		$orderIDs = explode( ',', $orderIDs );
 		foreach( $orderIDs as $orderID ) {
-			$tmp     = explode( '_', $orderID );
-			$orderID = (int) end( $tmp );
+			$orderID = (int) str_replace( $shopName, '', trim( $orderID ) );
 
 			$historyItem = ezOrderExportHistory::fetchByOrderID( $orderID );
 			if( $historyItem instanceof ezOrderExportHistory ) {
