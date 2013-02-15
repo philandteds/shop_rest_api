@@ -255,6 +255,41 @@ class ShopController extends ezpRestMvcController
 		return $result;
 	}
 
+	public function doGetProductStock() {
+		$params = array(
+			'product_id' => false,
+			'region'     => false,
+			'colour'     => false,
+			'size'       => false
+		);
+		foreach( $params as $param => $value ) {
+			if( isset( $this->request->post[ $param ] ) === false ) {
+				throw new Exception( '"' . $param . '" is not specified' );
+			} else {
+				$params[ $param ] = $this->request->post[ $param ];
+			}
+		}
+
+		$db = eZDB::instance();
+		$q  = '
+			SELECT InStock
+			FROM product
+			WHERE
+				LOWER( SUBSTRING_INDEX( LongCode, \'_\', -1 ) ) = LOWER( \'' . $db->escapeString( $params['region'] ) . '\' )
+				AND LOWER( ItemNumber ) = LOWER( \'' . $db->escapeString( $params['product_id'] ) . '\' )
+				AND LOWER( Series ) = LOWER( \'' . $db->escapeString( $params['size'] ) . '\' )
+				AND LOWER( ColourCode ) = LOWER( \'' . $db->escapeString( $params['colour'] ) . '\' );
+		';
+		$r = $db->arrayQuery( $q );
+		if( count( $r ) === 0 ) {
+			throw new Exception( 'Product not found' );
+		}
+
+		$result = new ezpRestMvcResult();
+		$result->variables['stock_level'] = $r[0]['InStock'];
+		return $result;
+	}
+
 	private function fetchOrders() {
 		/**
 		 * eZPersistentObject does not support NOT IN SQL statement. Thats why all

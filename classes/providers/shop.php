@@ -33,6 +33,13 @@ class ShopProvider implements ezpRestProviderInterface
 				array(
 					'http-post' => 'importProducts'
 				)
+			),
+			'getProductStock' => new ezpMvcRegexpRoute(
+				'@^/product/get_stock$@',
+				'ShopController',
+				array(
+					'http-post' => 'getProductStock'
+				)
 			)
 		);
 	}
