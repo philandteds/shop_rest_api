@@ -43,7 +43,7 @@ if( count( $ordersHistory ) > 0 ) {
 
 	$mail = new eZMail();
 	$mail->setContentType( 'text/plain' );
-	$mail->setSender( 'noreplay@mokopuna.com' );
+	$mail->setSender( 'noreply@mokopuna.com' );
 	$mail->setSubject( 'Export warning' );
 	$mail->setBody( $body );
 	$receivers = (array) $ini->variable( 'Notifications', 'Receivers' );;
