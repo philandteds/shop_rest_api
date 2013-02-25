@@ -5,6 +5,7 @@ ProviderClass[shop]=ShopProvider
 
 [Authentication]
 AuthenticationStyle=ezpRestBasicAuthStyle
+RequireHTTPS=disabled
 
 [CacheSettings]
 ApplicationCache=disabled
