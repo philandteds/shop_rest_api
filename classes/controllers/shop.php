@@ -278,7 +278,7 @@ class ShopController extends ezpRestMvcController
 				LOWER( SUBSTRING_INDEX( LongCode, \'_\', -1 ) ) = LOWER( \'' . $db->escapeString( $params['region'] ) . '\' )
 				AND LOWER( ItemNumber ) = LOWER( \'' . $db->escapeString( $params['product_id'] ) . '\' )
 				AND LOWER( Series ) = LOWER( \'' . $db->escapeString( $params['size'] ) . '\' )
-				AND LOWER( ColourCode ) = LOWER( \'' . $db->escapeString( $params['colour'] ) . '\' );
+				AND LOWER( Colour ) = LOWER( \'' . $db->escapeString( $params['colour'] ) . '\' );
 		';
 		$r = $db->arrayQuery( $q );
 		if( count( $r ) === 0 ) {
