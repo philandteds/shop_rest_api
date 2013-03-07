@@ -262,6 +262,7 @@ class ShopController extends ezpRestMvcController
 			'colour'     => false,
 			'size'       => false
 		);
+		
 		foreach( $params as $param => $value ) {
 			if( isset( $this->request->post[ $param ] ) === false ) {
 				throw new Exception( '"' . $param . '" is not specified' );
@@ -270,16 +271,19 @@ class ShopController extends ezpRestMvcController
 			}
 		}
 
+		$shop_ini = eZINI::instance( 'shop.ini' );
+		$warehouses = $shop_ini->variable( 'WarehouseSettings', 'AvailableWarehouses' );
 		$db = eZDB::instance();
 		$q  = '
 			SELECT InStock
 			FROM product
 			WHERE
-				LOWER( SUBSTRING_INDEX( LongCode, \'_\', -1 ) ) = LOWER( \'' . $db->escapeString( $params['region'] ) . '\' )
+				LOWER( SUBSTRING_INDEX( LongCode, \'_\', -1 ) ) = LOWER( \'' . $db->escapeString( $warehouses[0] ) . '\' )
 				AND LOWER( ItemNumber ) = LOWER( \'' . $db->escapeString( $params['product_id'] ) . '\' )
 				AND LOWER( Series ) = LOWER( \'' . $db->escapeString( $params['size'] ) . '\' )
 				AND LOWER( Colour ) = LOWER( \'' . $db->escapeString( $params['colour'] ) . '\' );
 		';
+		eZDebug::writeDebug($q, 'quantityCheck sql');
 		$r = $db->arrayQuery( $q );
 		if( count( $r ) === 0 ) {
 			throw new Exception( 'Product not found' );
