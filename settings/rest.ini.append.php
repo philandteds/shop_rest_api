@@ -4,6 +4,7 @@
 ProviderClass[shop]=ShopProvider
 
 [Authentication]
+RequireAuthentication=enabled
 AuthenticationStyle=ezpRestBasicAuthStyle
 RequireHTTPS=disabled
 

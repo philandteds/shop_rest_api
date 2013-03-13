@@ -208,7 +208,11 @@ class ShopController extends ezpRestMvcController
 			$moduleRepositories = eZModule::activeModuleRepositories( false );
 			eZModule::setGlobalPathList( $moduleRepositories );
 
-			$configs   = array( 'ljImportConfigProductSKU', 'ljImportConfigPrice' );
+			$configs   = array(
+				'ljImportConfigProductImage',
+				'ljImportConfigProductSKU',
+				'ljImportConfigPrice'
+			);
 			$timestamp = time();
 			$emailLogs = array();
 			foreach( $configs as $configClass ) {
@@ -262,7 +266,7 @@ class ShopController extends ezpRestMvcController
 			'colour'     => false,
 			'size'       => false
 		);
-		
+
 		foreach( $params as $param => $value ) {
 			if( isset( $this->request->post[ $param ] ) === false ) {
 				throw new Exception( '"' . $param . '" is not specified' );
