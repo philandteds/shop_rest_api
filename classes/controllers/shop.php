@@ -260,7 +260,8 @@ class ShopController extends ezpRestMvcController
 			'product_id' => false,
 			'region'     => false,
 			'colour'     => false,
-			'size'       => false
+			'size'       => false,
+			'warehouse'  => false
 		);
 		
 		foreach( $params as $param => $value ) {
@@ -272,13 +273,12 @@ class ShopController extends ezpRestMvcController
 		}
 
 		$shop_ini = eZINI::instance( 'shop.ini' );
-		$warehouses = $shop_ini->variable( 'WarehouseSettings', 'AvailableWarehouses' );
 		$db = eZDB::instance();
 		$q  = '
 			SELECT InStock
 			FROM product
 			WHERE
-				LOWER( SUBSTRING_INDEX( LongCode, \'_\', -1 ) ) = LOWER( \'' . $db->escapeString( $warehouses[0] ) . '\' )
+				LOWER( SUBSTRING_INDEX( LongCode, \'_\', -1 ) ) = LOWER( \'' . $db->escapeString( $params['warehouse'] ) . '\' )
 				AND LOWER( ItemNumber ) = LOWER( \'' . $db->escapeString( $params['product_id'] ) . '\' )
 				AND LOWER( Series ) = LOWER( \'' . $db->escapeString( $params['size'] ) . '\' )
 				AND LOWER( Colour ) = LOWER( \'' . $db->escapeString( $params['colour'] ) . '\' );
