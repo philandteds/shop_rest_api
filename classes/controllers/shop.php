@@ -131,9 +131,19 @@ class ShopController extends ezpRestMvcController
 				$productInfo['discount']            = $discount;
 
 				$options = eZProductCollectionItemOption::fetchList( $productItem['id'] );
-				foreach( $options as $option ) {
-					if( $option->attribute( 'name' ) == 'variations' ) {
-						$productInfo['SKU'] = $option->attribute( 'value' );
+				if( $productItem['item_object']->attribute( 'contentobject' )->attribute( 'class_identifier' ) === 'sale_bundle' ) {
+					foreach( $options as $option ) {
+						if( $option->attribute( 'name' ) == ProductVariationsType::PRODUCT_OPTION_SKU_LIST ) {
+							$productInfo['SKU'] = $option->attribute( 'value' );
+							break;
+						}
+					}
+				} else {
+					foreach( $options as $option ) {
+						if( $option->attribute( 'name' ) == 'variations' ) {
+							$productInfo['SKU'] = $option->attribute( 'value' );
+							break;
+						}
 					}
 				}
 
@@ -261,10 +271,7 @@ class ShopController extends ezpRestMvcController
 
 	public function doGetProductStock() {
 		$params = array(
-			'product_id' => false,
-			'region'     => false,
-			'colour'     => false,
-			'size'       => false
+			'longcode' => false
 		);
 
 		foreach( $params as $param => $value ) {
@@ -275,17 +282,12 @@ class ShopController extends ezpRestMvcController
 			}
 		}
 
-		$shop_ini = eZINI::instance( 'shop.ini' );
-		$warehouses = $shop_ini->variable( 'WarehouseSettings', 'AvailableWarehouses' );
 		$db = eZDB::instance();
 		$q  = '
 			SELECT InStock
 			FROM product
 			WHERE
-				LOWER( SUBSTRING_INDEX( LongCode, \'_\', -1 ) ) = LOWER( \'' . $db->escapeString( $warehouses[0] ) . '\' )
-				AND LOWER( ItemNumber ) = LOWER( \'' . $db->escapeString( $params['product_id'] ) . '\' )
-				AND LOWER( Series ) = LOWER( \'' . $db->escapeString( $params['size'] ) . '\' )
-				AND LOWER( Colour ) = LOWER( \'' . $db->escapeString( $params['colour'] ) . '\' );
+				LOWER( LongCode ) = LOWER( \'' . $db->escapeString( $params['longcode'] ) . '\' );
 		';
 		eZDebug::writeDebug($q, 'quantityCheck sql');
 		$r = $db->arrayQuery( $q );
