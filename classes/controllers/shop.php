@@ -284,7 +284,7 @@ class ShopController extends ezpRestMvcController
 
 		$db = eZDB::instance();
 		$q  = '
-			SELECT InStock
+			SELECT InStock, Eta
 			FROM product
 			WHERE
 				LOWER( LongCode ) = LOWER( \'' . $db->escapeString( $params['longcode'] ) . '\' );
@@ -297,6 +297,7 @@ class ShopController extends ezpRestMvcController
 
 		$result = new ezpRestMvcResult();
 		$result->variables['stock_level'] = $r[0]['InStock'];
+		$result->variables['eta'] = $r[0]['Eta'];
 		return $result;
 	}
 
