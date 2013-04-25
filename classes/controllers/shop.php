@@ -90,14 +90,25 @@ class ShopController extends ezpRestMvcController
 			}
 
 			$shippingCost = 0;
+			$discount     = 0;
 			$items = $order->attribute( 'order_items' );
 			foreach( $items as $item ) {
 				if( $item->attribute( 'type' ) === 'ezcustomshipping' ) {
 					$shippingCost = $item->attribute( 'price' );
 					break;
+				} elseif(
+					$item->attribute( 'type' ) === 'product_discount'
+					&& $item->attribute( 'description' ) !== 'all'
+				) {
+					$discount += $item->attribute( 'price' );
 				}
 			}
 			$orderInfo['shipping_cost'] = $shippingCost . ' ' . $currency;
+			$orderInfo['discount']      = $discount . ' ' . $currency;
+
+			$tmp = $order->attribute( 'order_info' );
+			$orderInfo['vat_amount'] = $tmp['total_price_info']['total_price_vat'] . ' ' . $currency;
+			$orderInfo['vat']        = $productItems[0]['vat_value'] . '%';
 
 			$orderInfo['billing_info']  = array();
 			$orderInfo['shipping_info'] = array();
@@ -121,15 +132,26 @@ class ShopController extends ezpRestMvcController
 			$orderInfo['products'] = array();
 			foreach( $productItems as $productItem ) {
 				$productInfo = array( '_tag' => 'product' );
-				$discount    = $productItem['price_inc_vat'] * $productItem['discount_percent'] . ' ' . $currency;
+
+				$discount = 0;
+				foreach( $items as $item ) {
+					if(
+						$item->attribute( 'type' ) === 'product_discount'
+						&& $item->attribute( 'description' ) === $productItem['id']
+					) {
+						$discount = $item->attribute( 'price' );
+						break;
+					}
+				}				
+
 
 				$productInfo['SKU']                 = false;
 				$productInfo['name']                = $productItem['object_name'];
 				$productInfo['count']               = $productItem['item_count'];
-				$productInfo['vat_value']           = $productItem['vat_value'] . ' ' . $currency;
 				$productInfo['total_price_ex_vat']  = $productItem['total_price_ex_vat'] . ' ' . $currency;
 				$productInfo['total_price_inc_vat'] = $productItem['total_price_inc_vat'] . ' ' . $currency;
-				$productInfo['discount']            = $discount;
+				$productInfo['vat_amount']          = ( $productInfo['total_price_inc_vat'] - $productInfo['total_price_ex_vat'] ) . ' ' . $currency;
+				$productInfo['discount']            = $discount . ' ' . $currency;
 
 				$options = eZProductCollectionItemOption::fetchList( $productItem['id'] );
 				if( $productItem['item_object']->attribute( 'contentobject' )->attribute( 'class_identifier' ) === 'sale_bundle' ) {
@@ -340,3 +362,4 @@ class ShopController extends ezpRestMvcController
 		$exportHistory->store();
 	}
 }
+
