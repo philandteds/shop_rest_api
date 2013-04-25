@@ -62,13 +62,14 @@ class ShopController extends ezpRestMvcController
 				$paymentGateway = call_user_func( array( $paymentGateway. 'Gateway', 'name' ) );
 			}
 
-			$regionName = 'Unknown';
-			$aiteaccess = eZOrderItem::fetchListByType( $order->attribute( 'id' ), 'siteaccess' );
-			if( count( $aiteaccess ) > 0 ) {
-				$aiteaccess = $aiteaccess[0];
-				if( isset( $regions[ $aiteaccess->attribute( 'description' ) ] ) ) {
-					$regionName = $regions[ $aiteaccess->attribute( 'description' ) ];
-				}
+			$regionName   = 'Unknown';
+			$saiteacceses = eZOrderItem::fetchListByType( $order->attribute( 'id' ), 'siteaccess' );
+			if( count( $saiteacceses ) > 0 ) {
+				$saiteaccess  = $saiteacceses[0];
+				$regionSAIni  = eZSiteAccess::getIni( $saiteaccess->attribute( 'description' ), 'site.ini' );
+				$locale       = $regionSAIni->variable( 'RegionalSettings', 'Locale' );
+				$locale       = eZLocale::instance( $locale );
+				$regionName   = $locale->countryName();
 			}
 
 			$orderInfo                        = array( '_tag' => 'order' );
@@ -98,11 +99,11 @@ class ShopController extends ezpRestMvcController
 			}
 			$orderInfo['shipping_cost'] = $shippingCost . ' ' . $currency;
 
-			$orderInfo['billing_info']	 = array();
+			$orderInfo['billing_info']  = array();
 			$orderInfo['shipping_info'] = array();
 			foreach( self::$billingAttributes as $attribute ) {
-				if ( isset( $accountInfo[ $attribute ] ) && $attribute == 'state' ) {
-					$value = xrowGeonames::getSubdivisionName($accountInfo[ 'country' ], $accountInfo[ $attribute ] );
+				if( isset( $accountInfo[ $attribute ] ) && $attribute == 'state' ) {
+					$value = xrowGeonames::getSubdivisionName( $accountInfo['country'], $accountInfo[ $attribute ] );
 				} else {
 					$value = isset( $accountInfo[ $attribute ] ) ? $accountInfo[ $attribute ] : null;
 				}
@@ -297,7 +298,7 @@ class ShopController extends ezpRestMvcController
 
 		$result = new ezpRestMvcResult();
 		$result->variables['stock_level'] = $r[0]['InStock'];
-		$result->variables['eta'] = $r[0]['Eta'];
+		$result->variables['eta']         = $r[0]['Eta'];
 		return $result;
 	}
 
