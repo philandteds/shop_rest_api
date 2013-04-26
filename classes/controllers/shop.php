@@ -65,11 +65,9 @@ class ShopController extends ezpRestMvcController
 			$regionName   = 'Unknown';
 			$saiteacceses = eZOrderItem::fetchListByType( $order->attribute( 'id' ), 'siteaccess' );
 			if( count( $saiteacceses ) > 0 ) {
-				$saiteaccess  = $saiteacceses[0];
-				$regionSAIni  = eZSiteAccess::getIni( $saiteaccess->attribute( 'description' ), 'site.ini' );
-				$locale       = $regionSAIni->variable( 'RegionalSettings', 'Locale' );
-				$locale       = eZLocale::instance( $locale );
-				$regionName   = $locale->countryName();
+				$saiteaccess   = $saiteacceses[0];
+				$regionShopINI = eZSiteAccess::getIni( $saiteaccess->attribute( 'description' ), 'shop.ini' );
+				$regionName    = $regionShopINI->variable( 'PriceSettings', 'PriceGroup' );
 			}
 
 			$orderInfo                        = array( '_tag' => 'order' );
@@ -85,6 +83,7 @@ class ShopController extends ezpRestMvcController
 			$orderInfo['account_email']       = $order->attribute( 'account_email' );
 			$orderInfo['user_comment']        = $accountInfo['message'];
 			$orderInfo['region']              = $regionName;
+			$orderInfo['siteaccess']          = $saiteaccess->attribute( 'description' );
 			foreach( self::$priceAttributes as $attribute ) {
 				$orderInfo[ $attribute ] = $order->attribute( $attribute ) . ' ' . $currency;
 			}
