@@ -28,7 +28,7 @@ class ShopController extends ezpRestMvcController
 
 	public function doExportOrders() {
 		$orders = $this->fetchOrders();
-		if( (bool) $this->request->variables['onlyNew'] === true ) {
+		if( (bool) $this->request->variables['dryRun'] === false ) {
 			foreach( $orders as $order ) {
 				$this->markOrderAsExported( $order );
 			}
@@ -141,7 +141,7 @@ class ShopController extends ezpRestMvcController
 						$discount = $item->attribute( 'price' );
 						break;
 					}
-				}				
+				}
 
 
 				$productInfo['SKU']                 = false;
