@@ -102,7 +102,7 @@ class ShopController extends ezpRestMvcController
 					$discount += $item->attribute( 'price' );
 				}
 			}
-			$orderInfo['shipping_cost'] = $shippingCost . ' ' . $currency;
+			$orderInfo['shipping_cost'] = $shippingCost;
 			$orderInfo['discount']      = $discount . ' ' . $currency;
 
 			$tmp = $order->attribute( 'order_info' );
