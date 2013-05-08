@@ -85,8 +85,9 @@ class ShopController extends ezpRestMvcController
 			$orderInfo['region']              = $regionName;
 			$orderInfo['siteaccess']          = $saiteaccess->attribute( 'description' );
 			foreach( self::$priceAttributes as $attribute ) {
-				$orderInfo[ $attribute ] = $order->attribute( $attribute ) . ' ' . $currency;
+				$orderInfo[ $attribute ] = $order->attribute( $attribute );
 			}
+			$orderInfo['currency']            = $currency;
 
 			$shippingCost = 0;
 			$discount     = 0;
@@ -103,10 +104,10 @@ class ShopController extends ezpRestMvcController
 				}
 			}
 			$orderInfo['shipping_cost'] = $shippingCost;
-			$orderInfo['discount']      = $discount . ' ' . $currency;
+			$orderInfo['discount']      = $discount;
 
 			$tmp = $order->attribute( 'order_info' );
-			$orderInfo['vat_amount'] = $tmp['total_price_info']['total_price_vat'] . ' ' . $currency;
+			$orderInfo['vat_amount'] = $tmp['total_price_info']['total_price_vat'];
 			$orderInfo['vat']        = $productItems[0]['vat_value'] . '%';
 
 			$orderInfo['billing_info']  = array();
@@ -143,14 +144,13 @@ class ShopController extends ezpRestMvcController
 					}
 				}
 
-
 				$productInfo['SKU']                 = false;
 				$productInfo['name']                = $productItem['object_name'];
 				$productInfo['count']               = $productItem['item_count'];
-				$productInfo['total_price_ex_vat']  = $productItem['total_price_ex_vat'] . ' ' . $currency;
-				$productInfo['total_price_inc_vat'] = $productItem['total_price_inc_vat'] . ' ' . $currency;
-				$productInfo['vat_amount']          = ( $productInfo['total_price_inc_vat'] - $productInfo['total_price_ex_vat'] ) . ' ' . $currency;
-				$productInfo['discount']            = $discount . ' ' . $currency;
+				$productInfo['total_price_ex_vat']  = $productItem['total_price_ex_vat'];
+				$productInfo['total_price_inc_vat'] = $productItem['total_price_inc_vat'];
+				$productInfo['vat_amount']          = ( $productInfo['total_price_inc_vat'] - $productInfo['total_price_ex_vat'] );
+				$productInfo['discount']            = $discount;
 
 				$options = eZProductCollectionItemOption::fetchList( $productItem['id'] );
 				if( $productItem['item_object']->attribute( 'contentobject' )->attribute( 'class_identifier' ) === 'sale_bundle' ) {
