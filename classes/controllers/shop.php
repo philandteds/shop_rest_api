@@ -164,6 +164,10 @@ class ShopController extends ezpRestMvcController
 					foreach( $options as $option ) {
 						if( $option->attribute( 'name' ) == 'variations' ) {
 							$productInfo['SKU'] = $option->attribute( 'value' );
+							if( isset( $orderInfo['shopping_code'] ) === false ) {
+								$tmp = explode( '_', $productInfo['SKU'] );
+								$orderInfo['shipping_code'] = 'PTNZ_FREIGHT-INTERNETSALE____' . $tmp[ count( $tmp ) - 1 ];
+							}
 							break;
 						}
 					}
