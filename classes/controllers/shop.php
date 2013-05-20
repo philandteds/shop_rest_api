@@ -154,12 +154,42 @@ class ShopController extends ezpRestMvcController
 
 				$options = eZProductCollectionItemOption::fetchList( $productItem['id'] );
 				if( $productItem['item_object']->attribute( 'contentobject' )->attribute( 'class_identifier' ) === 'sale_bundle' ) {
+					$SKUs       = array();
+					$quantities = array();
 					foreach( $options as $option ) {
 						if( $option->attribute( 'name' ) == ProductVariationsType::PRODUCT_OPTION_SKU_LIST ) {
-							$productInfo['SKU'] = $option->attribute( 'value' );
-							break;
+							$SKUs = explode( ',', $option->attribute( 'value' ) );
+						} elseif( $option->attribute( 'name' ) == ProductVariationsType::PRODUCT_OPTION_QTY_LIST ) {
+							$quantities = explode( ',', $option->attribute( 'value' ) );
 						}
 					}
+
+					// We are adding each item of the sale bundle to the export feed as separate product item
+					$productInfo['total_price_ex_vat']  = 0;
+					$productInfo['total_price_inc_vat'] = 0;
+					$productInfo['vat_amount']          = 0;
+					$productInfo['discount']            = 0;
+					foreach( $SKUs as $i => $SKU ) {
+						$tmp = explode( '_', $SKU );
+						$productObject = PTBasketCheckerHandler::fetchProductByItemNumberAndVersion(
+							$tmp[1],
+							$tmp[2]
+						);
+						if( $productObject instanceof eZContentObject ) {
+							$productInfo['name'] = $productObject->attribute( 'name' );
+						}
+
+						$qty = isset( $quantities[ $i ] ) ? (int) $quantities[ $i ] : 1;
+						$productInfo['SKU']   = $SKU;
+						$productInfo['count'] = $productItem['item_count'] * $qty;
+
+						if( isset( $orderInfo['shipping_code'] ) === false ) {
+							$orderInfo['shipping_code'] = 'PTNZ_FREIGHT-INTERNETSALE____' . $tmp[ count( $tmp ) - 1 ];
+						}
+
+						$orderInfo['products'][] = $productInfo;
+					}
+					continue;
 				} else {
 					foreach( $options as $option ) {
 						if( $option->attribute( 'name' ) == 'variations' ) {
