@@ -131,9 +131,39 @@ class ShopController extends ezpRestMvcController
 				$productInfo['discount']            = $discount;
 
 				$options = eZProductCollectionItemOption::fetchList( $productItem['id'] );
-				foreach( $options as $option ) {
-					if( $option->attribute( 'name' ) == 'variations' ) {
-						$productInfo['SKU'] = $option->attribute( 'value' );
+				if( $productItem['item_object']->attribute( 'contentobject' )->attribute( 'class_identifier' ) === 'products_bundle' ) {
+					$SKUs = array();
+					foreach( $options as $option ) {
+						if( $option->attribute( 'name' ) == ProductVariationsType::PRODUCT_OPTION_SKU_LIST ) {
+							$SKUs = explode( ',', $option->attribute( 'value' ) );
+						}
+					}
+
+					// We are adding each item of the sale bundle to the export feed as separate product item
+					$productInfo['total_price_ex_vat']  = 0;
+					$productInfo['total_price_inc_vat'] = 0;
+					$productInfo['vat_amount']          = 0;
+					$productInfo['discount']            = 0;
+					$productInfo['count']               = $productItem['item_count'];
+					foreach( $SKUs as $i => $SKU ) {
+						if( is_callable( array( 'mkExtendedAttributeFilters', 'fetchProductIDBySKU' ) ) === false ) {
+							continue;
+						}
+						$productID     = mkExtendedAttributeFilters::fetchProductIDBySKU( $SKU );
+						$productObject = eZContentObject::fetch( $productID );
+						if( $productObject instanceof eZContentObject ) {
+							$productInfo['name'] = $productObject->attribute( 'name' );
+						}
+
+						$productInfo['SKU'] = $SKU;
+						$orderInfo['products'][] = $productInfo;
+					}
+					continue;
+				} else {
+					foreach( $options as $option ) {
+						if( $option->attribute( 'name' ) == 'variations' ) {
+							$productInfo['SKU'] = $option->attribute( 'value' );
+						}
 					}
 				}
 
@@ -263,7 +293,7 @@ class ShopController extends ezpRestMvcController
 			'size'       => false,
 			'warehouse'  => false
 		);
-		
+
 		foreach( $params as $param => $value ) {
 			if( isset( $this->request->post[ $param ] ) === false ) {
 				throw new Exception( '"' . $param . '" is not specified' );
