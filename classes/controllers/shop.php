@@ -84,8 +84,9 @@ class ShopController extends ezpRestMvcController
 			$orderInfo['account_email']       = $order->attribute( 'account_email' );
 			$orderInfo['user_comment']        = $accountInfo['message'];
 			$orderInfo['region']              = $regionName;
+			$orderInfo['currency']            = $currency;
 			foreach( self::$priceAttributes as $attribute ) {
-				$orderInfo[ $attribute ] = $order->attribute( $attribute ) . ' ' . $currency;
+				$orderInfo[ $attribute ] = $order->attribute( $attribute );
 			}
 
 			$shippingCost = 0;
@@ -96,7 +97,7 @@ class ShopController extends ezpRestMvcController
 					break;
 				}
 			}
-			$orderInfo['shipping_cost'] = $shippingCost . ' ' . $currency;
+			$orderInfo['shipping_cost'] = $shippingCost;
 
 			$orderInfo['billing_info']	 = array();
 			$orderInfo['shipping_info'] = array();
@@ -120,14 +121,14 @@ class ShopController extends ezpRestMvcController
 			$orderInfo['products'] = array();
 			foreach( $productItems as $productItem ) {
 				$productInfo = array( '_tag' => 'product' );
-				$discount    = $productItem['price_inc_vat'] * $productItem['discount_percent'] . ' ' . $currency;
+				$discount    = $productItem['price_inc_vat'] * $productItem['discount_percent'];
 
 				$productInfo['SKU']                 = false;
 				$productInfo['name']                = $productItem['object_name'];
 				$productInfo['count']               = $productItem['item_count'];
-				$productInfo['vat_value']           = $productItem['vat_value'] . ' ' . $currency;
-				$productInfo['total_price_ex_vat']  = $productItem['total_price_ex_vat'] . ' ' . $currency;
-				$productInfo['total_price_inc_vat'] = $productItem['total_price_inc_vat'] . ' ' . $currency;
+				$productInfo['vat_value']           = $productItem['vat_value'];
+				$productInfo['total_price_ex_vat']  = $productItem['total_price_ex_vat'];
+				$productInfo['total_price_inc_vat'] = $productItem['total_price_inc_vat'];
 				$productInfo['discount']            = $discount;
 
 				$options = eZProductCollectionItemOption::fetchList( $productItem['id'] );
@@ -156,6 +157,10 @@ class ShopController extends ezpRestMvcController
 						}
 
 						$productInfo['SKU'] = $SKU;
+						if( isset( $orderInfo['shipping_code'] ) === false ) {
+							$tmp = explode( '_', $SKU );
+							$orderInfo['shipping_code'] = 'MOKO_FREIGHT-INTERNETSALE____' . $tmp[ count( $tmp ) - 1 ];
+						}
 						$orderInfo['products'][] = $productInfo;
 					}
 					continue;
@@ -164,6 +169,10 @@ class ShopController extends ezpRestMvcController
 						if( $option->attribute( 'name' ) == 'variations' ) {
 							$productInfo['SKU'] = $option->attribute( 'value' );
 						}
+					}
+					if( isset( $orderInfo['shipping_code'] ) === false ) {
+						$tmp = explode( '_', $productInfo['SKU'] );
+						$orderInfo['shipping_code'] = 'MOKO_FREIGHT-INTERNETSALE____' . $tmp[ count( $tmp ) - 1 ];
 					}
 				}
 
