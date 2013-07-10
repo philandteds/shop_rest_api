@@ -112,8 +112,10 @@ class ShopController extends ezpRestMvcController
 
 			$orderInfo['billing_info']  = array();
 			$orderInfo['shipping_info'] = array();
+			$allowStateCodeCountries = array('USA');
+			
 			foreach( self::$billingAttributes as $attribute ) {
-				if( isset( $accountInfo[ $attribute ] ) && $attribute == 'state' ) {
+				if( isset( $accountInfo[ $attribute ] ) && $attribute == 'state' && !in_array( $accountInfo['country'], $allowStateCodeCountries ) ) {
 					$value = xrowGeonames::getSubdivisionName( $accountInfo['country'], $accountInfo[ $attribute ] );
 				} else {
 					$value = isset( $accountInfo[ $attribute ] ) ? $accountInfo[ $attribute ] : null;
@@ -121,7 +123,7 @@ class ShopController extends ezpRestMvcController
 				$orderInfo['billing_info'][ $attribute ] = $value;
 
 				$spinningAttribute = 's_' . $attribute;
-				if ( isset( $accountInfo[ $spinningAttribute ] ) && $attribute == 'state' ) {
+				if ( isset( $accountInfo[ $spinningAttribute ] ) && $attribute == 'state' && !in_array( $accountInfo['country'], $allowStateCodeCountries ) ) {
 					$value = xrowGeonames::getSubdivisionName($accountInfo[ 'country' ], $accountInfo[ $spinningAttribute ] );
 				} else {
 					$value = isset( $accountInfo[ $spinningAttribute ] ) ? $accountInfo[ $spinningAttribute ] : null;
