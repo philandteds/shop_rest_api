@@ -25,6 +25,15 @@ $startTime = microtime( true );
 
 $ini = eZINI::instance( 'rest.ini' );
 
+// Remove statuses for removed orders
+$q = '
+	DELETE e.*
+	FROM ezorder_export_history e
+	LEFT JOIN ezorder o ON ( o.id = e.order_id )
+	WHERE o.id IS NULL
+';
+eZDB::instance()->query( $q );
+
 $timestamp     = time() - (int) $ini->variable( 'Export', 'WrongOrdersTimeDiff' );
 $ordersHistory = ezOrderExportHistory::fetchList(
 	array(
