@@ -62,6 +62,7 @@ class ShopController extends ezpRestMvcController
 				$paymentGateway = call_user_func( array( $paymentGateway. 'Gateway', 'name' ) );
 			}
 
+			$saiteaccess  = false;
 			$regionName   = 'Unknown';
 			$saiteacceses = eZOrderItem::fetchListByType( $order->attribute( 'id' ), 'siteaccess' );
 			if( count( $saiteacceses ) > 0 ) {
@@ -83,7 +84,7 @@ class ShopController extends ezpRestMvcController
 			$orderInfo['account_email']       = $order->attribute( 'account_email' );
 			$orderInfo['user_comment']        = $accountInfo['message'];
 			$orderInfo['region']              = $regionName;
-			$orderInfo['siteaccess']          = $saiteaccess->attribute( 'description' );
+			$orderInfo['siteaccess']          = $saiteaccess instanceof eZOrderItem ? $saiteaccess->attribute( 'description' ) : 'Unknown';
 			foreach( self::$priceAttributes as $attribute ) {
 				$orderInfo[ $attribute ] = $order->attribute( $attribute );
 			}
