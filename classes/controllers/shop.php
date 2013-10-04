@@ -63,12 +63,18 @@ class ShopController extends ezpRestMvcController
 			}
 
 			$regionName = 'Unknown';
-			$aiteaccess = eZOrderItem::fetchListByType( $order->attribute( 'id' ), 'siteaccess' );
-			if( count( $aiteaccess ) > 0 ) {
-				$aiteaccess = $aiteaccess[0];
-				if( isset( $regions[ $aiteaccess->attribute( 'description' ) ] ) ) {
-					$regionName = $regions[ $aiteaccess->attribute( 'description' ) ];
+			$siteaccess = eZOrderItem::fetchListByType( $order->attribute( 'id' ), 'siteaccess' );
+			if( count( $siteaccess ) > 0 ) {
+				$siteaccess = $siteaccess[0];
+				if( isset( $regions[ $siteaccess->attribute( 'description' ) ] ) ) {
+					$regionName = $regions[ $siteaccess->attribute( 'description' ) ];
 				}
+			}
+
+			$couponCode  = '';
+			$couponItems = eZOrderItem::fetchListByType( $order->attribute( 'id' ), 'coupon' );
+			if( count( $couponItems ) > 0 ) {
+				$couponCode = $couponItems[0]->attribute( 'description' );
 			}
 
 			$orderInfo                        = array( '_tag' => 'order' );
@@ -85,6 +91,8 @@ class ShopController extends ezpRestMvcController
 			$orderInfo['user_comment']        = $accountInfo['message'];
 			$orderInfo['region']              = $regionName;
 			$orderInfo['currency']            = $currency;
+			$orderInfo['siteaccess']          = $siteaccess instanceof eZOrderItem ? $siteaccess->attribute( 'description' ) : 'Unknown';
+			$orderInfo['coupon_code']         = $couponCode;
 			foreach( self::$priceAttributes as $attribute ) {
 				$orderInfo[ $attribute ] = $order->attribute( $attribute );
 			}
