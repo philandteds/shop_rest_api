@@ -71,6 +71,12 @@ class ShopController extends ezpRestMvcController
 				$regionName    = $regionShopINI->variable( 'PriceSettings', 'PriceGroup' );
 			}
 
+			$couponCode  = '';
+			$couponItems = eZOrderItem::fetchListByType( $order->attribute( 'id' ), 'coupon' );
+			if( count( $couponItems ) > 0 ) {
+				$couponCode = $couponItems[0]->attribute( 'description' );
+			}
+
 			$orderInfo                        = array( '_tag' => 'order' );
 			$orderInfo['id']                  = $shopName . $order->attribute( 'id' );
 			$orderInfo['is_archived']         = $order->attribute( 'is_archived' );
@@ -85,6 +91,7 @@ class ShopController extends ezpRestMvcController
 			$orderInfo['user_comment']        = $accountInfo['message'];
 			$orderInfo['region']              = $regionName;
 			$orderInfo['siteaccess']          = $saiteaccess instanceof eZOrderItem ? $saiteaccess->attribute( 'description' ) : 'Unknown';
+			$orderInfo['coupon_code']         = $couponCode;
 			foreach( self::$priceAttributes as $attribute ) {
 				$orderInfo[ $attribute ] = $order->attribute( $attribute );
 			}
