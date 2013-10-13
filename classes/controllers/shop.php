@@ -131,22 +131,41 @@ class ShopController extends ezpRestMvcController
 				$productInfo['total_price_inc_vat'] = $productItem['total_price_inc_vat'];
 				$productInfo['discount']            = $discount;
 
+				$SKUs    = array();
 				$options = eZProductCollectionItemOption::fetchList( $productItem['id'] );
 				if( $productItem['item_object']->attribute( 'contentobject' )->attribute( 'class_identifier' ) === 'products_bundle' ) {
-					$SKUs = array();
 					foreach( $options as $option ) {
 						if( $option->attribute( 'name' ) == ProductVariationsType::PRODUCT_OPTION_SKU_LIST ) {
 							$SKUs = explode( ',', $option->attribute( 'value' ) );
 						}
 					}
+				}elseif( $productItem['item_object']->attribute( 'contentobject' )->attribute( 'class_identifier' ) === 'sale_bundle_uc' ) {
+					foreach( $options as $option ) {
+						if( $option->attribute( 'name' ) == ProductSetType::OPTION_TYPE_SELECTED_SKU ) {
+							$tmp    = explode( ';', $option->attribute( 'value' ) );
+							$SKUs[] = $tmp[1];
+						}
+					}
+				} else {
+					foreach( $options as $option ) {
+						if( $option->attribute( 'name' ) == 'variations' ) {
+							$productInfo['SKU'] = $option->attribute( 'value' );
+						}
+					}
+					if( isset( $orderInfo['shipping_code'] ) === false ) {
+						$tmp = explode( '_', $productInfo['SKU'] );
+						$orderInfo['shipping_code'] = 'MOKO_FREIGHT-INTERNETSALE____' . $tmp[ count( $tmp ) - 1 ];
+					}
+				}
 
-					// We are adding each item of the sale bundle to the export feed as separate product item
+				// We are adding each item of the sale bundle to the export feed as separate product item
+				if( count( $SKUs ) > 0 ) {
 					$productInfo['total_price_ex_vat']  = 0;
 					$productInfo['total_price_inc_vat'] = 0;
 					$productInfo['vat_amount']          = 0;
 					$productInfo['discount']            = 0;
 					$productInfo['count']               = $productItem['item_count'];
-					foreach( $SKUs as $i => $SKU ) {
+					foreach( $SKUs as $SKU ) {
 						if( is_callable( array( 'mkExtendedAttributeFilters', 'fetchProductIDBySKU' ) ) === false ) {
 							continue;
 						}
@@ -164,16 +183,6 @@ class ShopController extends ezpRestMvcController
 						$orderInfo['products'][] = $productInfo;
 					}
 					continue;
-				} else {
-					foreach( $options as $option ) {
-						if( $option->attribute( 'name' ) == 'variations' ) {
-							$productInfo['SKU'] = $option->attribute( 'value' );
-						}
-					}
-					if( isset( $orderInfo['shipping_code'] ) === false ) {
-						$tmp = explode( '_', $productInfo['SKU'] );
-						$orderInfo['shipping_code'] = 'MOKO_FREIGHT-INTERNETSALE____' . $tmp[ count( $tmp ) - 1 ];
-					}
 				}
 
 				$orderInfo['products'][] = $productInfo;
