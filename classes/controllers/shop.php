@@ -363,7 +363,7 @@ class ShopController extends ezpRestMvcController
 		$gmt_date = ($r[0]['Eta'] != '') ? DateTime::createFromFormat('d/m/Y', $r[0]['Eta'], new DateTimeZone('GMT')) : '';
 		$result = new ezpRestMvcResult();
 		$result->variables['stock_level'] = $r[0]['InStock'];
-		$result->variables['eta']         = $gmt_date->format('Y-m-d H:i:sP');;
+		$result->variables['eta']         = $gmt_date->format('Y-m-d H:i:sP');
 		return $result;
 	}
 
