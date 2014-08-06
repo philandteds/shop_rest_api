@@ -350,7 +350,7 @@ class ShopController extends ezpRestMvcController
 
 		$db = eZDB::instance();
 		$q  = '
-			SELECT InStock, Eta
+			SELECT InStock, OnOrder, Eta
 			FROM product
 			WHERE
 				LOWER( LongCode ) = LOWER( \'' . $db->escapeString( $params['longcode'] ) . '\' );
@@ -364,6 +364,7 @@ class ShopController extends ezpRestMvcController
 		
 		$result = new ezpRestMvcResult();
 		$result->variables['stock_level'] = $r[0]['InStock'];
+		$result->variables['stock_coming'] = $r[0]['OnOrder'];
 		$result->variables['eta']         = ($r[0]['Eta'] != '') ? $gmt_date->format('Y-m-d H:i:sP') : '';
 		return $result;
 	}
