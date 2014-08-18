@@ -30,7 +30,7 @@ class ShopController extends ezpRestMvcController
 		$orders = $this->fetchOrders();
 		if( (bool) $this->request->variables['onlyNew'] === true ) {
 			foreach( $orders as $order ) {
-				$this->markOrderAsExported( $order );
+				//$this->markOrderAsExported( $order );
 			}
 		}
 
@@ -119,7 +119,7 @@ class ShopController extends ezpRestMvcController
 
 				$spinningAttribute = 's_' . $attribute;
 				if ( isset( $accountInfo[ $spinningAttribute ] ) && $attribute == 'state' ) {
-					$value = xrowGeonames::getSubdivisionName($accountInfo[ 'country' ], $accountInfo[ $spinningAttribute ] );
+					$value = xrowGeonames::getSubdivisionName($accountInfo[ 's_country' ], $accountInfo[ $spinningAttribute ] );
 				} else {
 					$value = isset( $accountInfo[ $spinningAttribute ] ) ? $accountInfo[ $spinningAttribute ] : null;
 				}
