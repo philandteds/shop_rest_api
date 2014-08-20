@@ -30,7 +30,7 @@ class ShopController extends ezpRestMvcController
 		$orders = $this->fetchOrders();
 		if( (bool) $this->request->variables['onlyNew'] === true ) {
 			foreach( $orders as $order ) {
-				//$this->markOrderAsExported( $order );
+				$this->markOrderAsExported( $order );
 			}
 		}
 
