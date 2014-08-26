@@ -360,12 +360,12 @@ class ShopController extends ezpRestMvcController
 		if( count( $r ) === 0 ) {
 			throw new Exception( 'Product not found' );
 		}
-		$format = (count($r[0]['Eta']) == 10) ? 'd/m/Y' : 'D M d H:i:s T Y';
+		$format = (strlen($r[0]['Eta']) == 10) ? 'd/m/Y' : 'D M d H:i:s T Y';
 		$gmt_date = ($r[0]['Eta'] != '') ? DateTime::createFromFormat($format, $r[0]['Eta'], new DateTimeZone('GMT')) : '';
 		
 		$result = new ezpRestMvcResult();
-		$result->variables['stock_level'] = $r[0]['InStock'];
-		$result->variables['stock_coming'] = $r[0]['OnOrder'];
+		$result->variables['stock_level'] = (int) $r[0]['InStock'];
+		$result->variables['stock_coming'] = (int) $r[0]['OnOrder'];
 		$result->variables['eta']         = ($r[0]['Eta'] != '' && is_object($gmt_date)) ? $gmt_date->format('Y-m-d H:i:sP') : '';
 		return $result;
 	}
