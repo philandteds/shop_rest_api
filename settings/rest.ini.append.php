@@ -15,7 +15,6 @@ WrongOrdersTimeDiff=3600
 
 [Notifications]
 Receivers[]
-Receivers[]=dolgushev.serhey@gmail.com
 
 [RouteSettings]
 SkipFilter[]=ShopController_getProductStock
