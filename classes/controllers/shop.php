@@ -366,7 +366,7 @@ class ShopController extends ezpRestMvcController
 		$result = new ezpRestMvcResult();
 		$result->variables['stock_level'] = (int) $r[0]['InStock'];
 		$result->variables['stock_coming'] = (int) $r[0]['OnOrder'];
-		$result->variables['eta']         = ($r[0]['Eta'] != '' && is_object($gmt_date)) ? $gmt_date->format('Y-m-d H:i:sP') : '';
+		$result->variables['eta']         = ($r[0]['Eta'] != '' && is_object($gmt_date)) ? $gmt_date->format('Y-m-d\TH:i:sP') : '';
 		return $result;
 	}
 
