@@ -348,25 +348,12 @@ class ShopController extends ezpRestMvcController
 			}
 		}
 
-		$db = eZDB::instance();
-		$q  = '
-			SELECT InStock, OnOrder, Eta
-			FROM product
-			WHERE
-				LOWER( LongCode ) = LOWER( \'' . $db->escapeString( $params['longcode'] ) . '\' );
-		';
-		eZDebug::writeDebug($q, 'quantityCheck sql');
-		$r = $db->arrayQuery( $q );
-		if( count( $r ) === 0 ) {
-			throw new Exception( 'Product not found' );
-		}
-		$format = (strlen($r[0]['Eta']) == 10) ? 'd/m/Y' : 'D M d H:i:s T Y';
-		$gmt_date = ($r[0]['Eta'] != '') ? DateTime::createFromFormat($format, $r[0]['Eta'], new DateTimeZone('GMT')) : '';
-		
+        $stockLevel = ptStockLevelQuery::getProductStock($params['longcode']);
+
 		$result = new ezpRestMvcResult();
-		$result->variables['stock_level'] = (int) $r[0]['InStock'];
-		$result->variables['stock_coming'] = (int) $r[0]['OnOrder'];
-		$result->variables['eta']         = ($r[0]['Eta'] != '' && is_object($gmt_date)) ? $gmt_date->format('Y-m-d\TH:i:sP') : '';
+		$result->variables['stock_level'] = $stockLevel['stock_level'];
+		$result->variables['stock_coming'] = $stockLevel['stock_coming'];
+		$result->variables['eta']         = $stockLevel['eta'];
 		return $result;
 	}
 
