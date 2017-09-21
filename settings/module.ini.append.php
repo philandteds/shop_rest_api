@@ -3,4 +3,5 @@
 [ModuleSettings]
 ExtensionRepositories[]=shop_rest_api
 ModuleList[]=orders_export
+ModuleList[]=stock_api
 */ ?>
