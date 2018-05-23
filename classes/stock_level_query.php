@@ -8,7 +8,7 @@ class ptStockLevelQuery
     {
 
         if (!$longcode) {
-            throw Exception('"longcode" is not specified');
+            throw new Exception('"longcode" is not specified');
         }
 
         $db = eZDB::instance();
